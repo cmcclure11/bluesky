@@ -178,7 +178,6 @@ class PrichardOneill(EmissionsBase):
     def run(self, fires):
         logging.info("Running emissions module with Prichard / O'Neill EFs")
 
-        # Instantiate two lookup object, one Rx and one WF, to be reused
         for fire in fires:
             with self.fire_failure_handler(fire):
                 self._run_on_fire(fire)
@@ -319,6 +318,50 @@ class Consume(EmissionsBase):
         # TODO: act on 'self.include_emissions_details'?  consume emissions
         #   doesn't provide as detailed emissions as FEPS and Prichard/O'Neill;
         #   it lists per-category emissions, not per-sub-category
+
+##
+## FRP
+##
+
+class Frp(EmissionsBase):
+
+    def __init__(self, fire_failure_handler, config_getter):
+        super(Frp, self).__init__(fire_failure_handler, config_getter)
+
+    def run(self, fires):
+        logging.info("Running FRP based emissions module")
+
+        for fire in fires:
+            with self.fire_failure_handler(fire):
+                self._run_on_fire(fire)
+
+    def _run_on_fire(self, fire):
+        if 'growth' not in fire:
+            raise ValueError(
+                "Missing growth data required for computing emissions")
+
+        for g in fire['growth']:
+            if 'hourly_frp' not in g:
+                raise ValueError(
+                    "Missing hourly FRP data required for computing FRP emissions")
+
+            if 'fuelbeds' not in g:
+                g["fuelbeds"] = [{"pct": 100.0}]
+
+            # TODO: Set timeprofile based on hourly FRP (overwriting existing
+            #    timeprofile, which would have been based on area values)
+
+            # TODO: compute heat from g["frp"] (and break it out into flaming,
+            #    residual, and smoldering?  <-- could assign all to flaming?)
+
+            # TODO: compute PM2.5 (?)
+
+            for fb in g['fuelbeds']:
+                # TODO: set head bsed on g["heat"] and fb["pct"]
+
+                # TODO: set PM2.5 based on g["emissions"]
+
+                pass
 
 
 ##

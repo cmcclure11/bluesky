@@ -455,3 +455,36 @@ class TestConsumeEmissions(BaseEmissionsTest):
         assert 'emissions_details' in self.fires[1]['growth'][0]['fuelbeds'][0]
         self._check_emissions(self.EXPECTED_FIRE1_EMISSIONS_PM_ONLY,
             self.fires[1]['growth'][0]['fuelbeds'][0]['emissions'])
+
+
+class TestUrbanskiEmissions(BaseEmissionsTest):
+
+    EXPECTED_FIRE1_EMISSIONS = {
+        'flaming': {
+            'PM2.5': [0.0]  # TODO: set correct value
+        },
+        'residual': {
+            'PM2.5': [0.0]  # TODO: set correct value
+        },
+        'smoldering': {
+            'PM2.5': [0.0]  # TODO: set correct value
+        },
+        'total': {
+            'PM2.5': [0.0]  # TODO: set correct value
+        }
+    }
+
+
+    def test_basic(self):
+        config_getter = create_config_getter({
+            "emissions": {
+                "model": "frp"
+            }
+        })
+        emissions.Frp(fire_failure_manager, config_getter).run(self.fires)
+
+        self._check_emissions(self.EXPECTED_FIRE1_EMISSIONS,
+            self.fires[0]['growth'][0]['fuelbeds'][0]['emissions'])
+
+        assert self.fires[1]['error'] == (
+            'Missing fuelbed data required for computing emissions')
